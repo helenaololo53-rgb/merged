@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root {
+      /* Светлая тема (тёплая коралловая айдентика) */
+      --bg-1: #fdece4;
+      --bg-2: #fbf1ff;
+      --aurora-1: rgba(239, 127, 95, 0.30);
+      --aurora-2: rgba(245, 170, 120, 0.26);
+
+      --text: #2b2420;
+      --text-muted: #8a7b72;
+      --border: rgba(239, 127, 95, 0.18);
+      --border-soft: rgba(239, 127, 95, 0.10);
+      --highlight: rgba(255, 255, 255, 0.7);
+      --shadow: rgba(120, 70, 45, 0.16);
+
+      --accent: #ef7f5f;
+      --accent-2: #f0a04b;
+      --accent-hover: #e5684a;
+      --accent-soft: rgba(239, 127, 95, 0.12);
+      --on-accent: #ffffff;
+
+      --glass: rgba(255, 255, 255, 0.62);
+      --glass-strong: rgba(255, 255, 255, 0.78);
+      --field-bg: rgba(255, 255, 255, 0.66);
+
+      --success: #2f9e64;
+      --success-bg: rgba(47, 158, 100, 0.14);
+      --error: #d94f4f;
+      --error-bg: rgba(217, 79, 79, 0.12);
+
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 9px;
+    }
+    :root[data-theme="dark"] {
+      --bg-1: #1a1310;
+      --bg-2: #17131f;
+      --aurora-1: rgba(239, 127, 95, 0.26);
+      --aurora-2: rgba(245, 170, 120, 0.20);
+
+      --text: #f4ece7;
+      --text-muted: #b3a49b;
+      --border: rgba(255, 255, 255, 0.13);
+      --border-soft: rgba(255, 255, 255, 0.07);
+      --highlight: rgba(255, 255, 255, 0.12);
+      --shadow: rgba(0, 0, 0, 0.5);
+
+      --accent: #ff9576;
+      --accent-2: #ffb066;
+      --accent-hover: #ff8055;
+      --accent-soft: rgba(255, 149, 118, 0.18);
+      --on-accent: #241611;
+
+      --glass: rgba(255, 255, 255, 0.06);
+      --glass-strong: rgba(255, 255, 255, 0.10);
+      --field-bg: rgba(255, 255, 255, 0.06);
+
+      --success: #6fe0a0;
+      --success-bg: rgba(47, 158, 100, 0.22);
+      --error: #ff9d86;
+      --error-bg: rgba(217, 79, 79, 0.22);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg-1: #1a1310; --bg-2: #17131f;
+        --aurora-1: rgba(239, 127, 95, 0.26); --aurora-2: rgba(245, 170, 120, 0.20);
+        --text: #f4ece7; --text-muted: #b3a49b;
+        --border: rgba(255, 255, 255, 0.13); --border-soft: rgba(255, 255, 255, 0.07);
+        --highlight: rgba(255, 255, 255, 0.12); --shadow: rgba(0, 0, 0, 0.5);
+        --accent: #ff9576; --accent-2: #ffb066; --accent-hover: #ff8055;
+        --accent-soft: rgba(255, 149, 118, 0.18); --on-accent: #241611;
+        --glass: rgba(255, 255, 255, 0.06); --glass-strong: rgba(255, 255, 255, 0.10);
+        --field-bg: rgba(255, 255, 255, 0.06);
+        --success: #6fe0a0; --success-bg: rgba(47, 158, 100, 0.22);
+        --error: #ff9d86; --error-bg: rgba(217, 79, 79, 0.22);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      width: 420px;
+      padding: 16px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--text);
+      margin: 0;
+      background:
+        radial-gradient(110% 80% at 100% 0%, var(--aurora-1), transparent 58%),
+        radial-gradient(100% 70% at 0% 100%, var(--aurora-2), transparent 56%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    }
+    .app {
+      background: var(--glass);
+      backdrop-filter: blur(24px) saturate(165%);
+      -webkit-backdrop-filter: blur(24px) saturate(165%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 16px 46px var(--shadow), inset 0 1px 0 var(--highlight);
+      padding: 18px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      letter-spacing: -0.2px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 6px; }
+    .icon-link {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: var(--field-bg);
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .icon-link:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .theme-btn {
+      flex: none; width: 32px; height: 32px; border-radius: 10px;
+      border: 1px solid var(--border-soft); cursor: pointer;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 14px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.1s, filter 0.15s;
+    }
+    .theme-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+    .config-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 7px 12px;
+      background: var(--field-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      box-shadow: inset 0 1px 0 var(--highlight);
+    }
+    .config-status.active {
+      background: var(--success-bg);
+      color: var(--success);
+      border-color: transparent;
+    }
+    /* Блок панели проблемных писем */
+    .panel-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 12px;
+      margin-bottom: 14px;
+      background: var(--field-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      box-shadow: inset 0 1px 0 var(--highlight);
+    }
+    .panel-status {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+    .panel-status.has-items { color: var(--accent); font-weight: 600; }
+    .panel-status.error { color: var(--error); }
+    .panel-btns { display: flex; gap: 6px; flex: none; }
+    .mini-btn {
+      width: 30px; height: 30px;
+      border-radius: 9px;
+      border: 1px solid var(--border-soft);
+      background: var(--glass-strong);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .mini-btn:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .field { margin-bottom: 14px; }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 5px;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      box-sizing: border-box;
+      font-family: inherit;
+      background: var(--field-bg);
+      color: var(--text);
+      box-shadow: inset 0 1px 0 var(--highlight);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 0.7; }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: inset 0 1px 0 var(--highlight), 0 0 0 3px var(--accent-soft);
+    }
+    input[readonly] {
+      background: var(--glass-strong);
+      color: var(--text-muted);
+      text-overflow: ellipsis;
+    }
+    textarea { min-height: 48px; resize: vertical; }
+    select { appearance: auto; cursor: pointer; }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: var(--cal-filter, none);
+      opacity: 0.7; cursor: pointer;
+    }
+    :root[data-theme="dark"] input[type="date"] { --cal-filter: invert(0.8); }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) input[type="date"] { --cal-filter: invert(0.8); }
+    }
+    .row, .row-3 { display: flex; gap: 10px; }
+    .row > *, .row-3 > * { flex: 1; }
+    button#saveBtn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--on-accent);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.3);
+      transition: filter 0.15s, transform 0.05s;
+    }
+    button#saveBtn:hover { filter: brightness(1.05); }
+    button#saveBtn:active { transform: scale(0.98); }
+    #status {
+      margin-top: 10px;
+      font-size: 12px;
+      text-align: center;
+      min-height: 18px;
+      color: var(--text-muted);
+    }
+    #status.success { color: var(--success); }
+    #status.error { color: var(--error); }
+    .pick-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+      align-items: center;
+    }
+    .pick-hint { font-size: 10px; color: var(--text-muted); margin-right: 2px; }
+    .pick-chip {
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--field-bg);
+      color: var(--text);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .pick-chip:hover { border-color: var(--accent); }
+    .pick-chip.active {
+      background: var(--accent);
+      color: var(--on-accent);
+      border-color: transparent;
+    }
+    #dupConfirm {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--error);
+      background: var(--error-bg);
+      border-radius: var(--radius-md);
+    }
+    .dup-msg {
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: 8px;
+      text-align: center;
+      line-height: 1.35;
+    }
+    .dup-actions { display: flex; gap: 8px; }
+    .dup-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+    .dup-btn-danger { background: var(--error); color: #fff; }
+    .dup-btn-outline { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-soft);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .footer kbd {
+      background: var(--field-bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: inherit;
+      font-size: 11px;
+      box-shadow: inset 0 1px 0 var(--highlight);
+    }
+    .field-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>📋 Взять на контроль</h1>
+      <div class="header-actions">
+        <a href="#" id="settingsLink" class="icon-link">⚙️ Настройки</a>
+        <button class="theme-btn" id="themeToggle" title="Светлая/тёмная тема" type="button">🌙</button>
+      </div>
+    </header>
+
+    <div id="configStatus" class="config-status">⏳ Проверка настроек...</div>
+
+    <div class="panel-box">
+      <span id="panelStatus" class="panel-status">🛎 Панель: загрузка…</span>
+      <div class="panel-btns">
+        <button id="panelRefresh" type="button" class="mini-btn" title="Обновить список проблемных писем">⟳</button>
+        <button id="panelLogin" type="button" class="mini-btn" title="Войти через Google">🔑</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="topic">Тема письма</label>
+      <input type="text" id="topic" placeholder="Загрузка...">
+    </div>
+
+    <div class="row">
+      <div class="field" id="numberField">
+        <label for="number">Номер ЗП/Перемещения</label>
+        <input type="text" id="number" placeholder="Например: 12345">
+      </div>
+      <div class="field" id="warehouseField">
+        <label for="warehouse">Склад</label>
+        <input type="text" id="warehouse" placeholder="Склад А">
+        <div class="pick-chips" id="warehousePicks" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Новые поля: Вид, Поставщик, Документ -->
+    <div class="row-3">
+      <div class="field" id="typeField">
+        <label for="type">Вид</label>
+        <input type="text" id="type" list="typeOptions" placeholder="Вид" autocomplete="off">
+        <datalist id="typeOptions"></datalist>
+        <div class="pick-chips" id="typePicks" style="display:none;"></div>
+      </div>
+      <div class="field" id="supplierField">
+        <label for="supplier">Поставщик</label>
+        <input type="text" id="supplier" placeholder="Поставщик">
+      </div>
+      <div class="field" id="documentField">
+        <label for="document">Документ</label>
+        <input type="text" id="document" placeholder="Комментарий по документу">
+      </div>
+    </div>
+
+    <div class="field" id="commentField">
+      <label for="comment">Комментарий</label>
+      <textarea id="comment" placeholder="Краткое описание"></textarea>
+    </div>
+
+    <div class="field" id="dateField">
+      <label for="date">Дата письма</label>
+      <input type="date" id="date">
+    </div>
+
+    <!-- Выбор метки — виден, только когда в настройках задано больше одной метки. -->
+    <div class="field" id="labelPickField" style="display:none;">
+      <label>Метка на письмо</label>
+      <div class="pick-chips" id="labelPicks"></div>
+    </div>
+
+    <button id="saveBtn">✅ Перенести в таблицу</button>
+    <div id="status"></div>
+
+    <div id="dupConfirm" style="display:none;">
+      <div class="dup-msg" id="dupMsg"></div>
+      <div class="dup-actions">
+        <button type="button" id="dupProceed" class="dup-btn dup-btn-danger">Всё равно добавить</button>
+        <button type="button" id="dupCancel" class="dup-btn dup-btn-outline">Отмена</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Горячая клавиша: <kbd>Alt+Y</kbd> · <a href="#" id="shortcutLink" class="icon-link" style="padding:2px 8px;">изменить</a></span>
+      <a href="#" id="settingsLink2" class="icon-link">⚙️ Настройки</a>
+    </div>
+    <div id="extVersion" style="text-align:center; opacity:0.5; font-size:11px; margin-top:4px;"></div>
+  </div>
+
+  <script src="defaults.js"></script>
+  <script src="theme.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

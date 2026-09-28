@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Настройки — Контроль почты</title>
+  <style>
+    :root {
+      --bg-1: #fdece4;
+      --bg-2: #fbf1ff;
+      --aurora-1: rgba(239, 127, 95, 0.26);
+      --aurora-2: rgba(245, 170, 120, 0.22);
+
+      --text: #2b2420;
+      --text-muted: #8a7b72;
+      --border: rgba(239, 127, 95, 0.18);
+      --border-soft: rgba(239, 127, 95, 0.10);
+      --highlight: rgba(255, 255, 255, 0.7);
+      --shadow: rgba(120, 70, 45, 0.14);
+
+      --accent: #ef7f5f;
+      --accent-2: #f0a04b;
+      --accent-hover: #e5684a;
+      --accent-soft: rgba(239, 127, 95, 0.12);
+      --on-accent: #ffffff;
+
+      --glass: rgba(255, 255, 255, 0.6);
+      --glass-strong: rgba(255, 255, 255, 0.78);
+      --field-bg: rgba(255, 255, 255, 0.66);
+
+      --success: #2f9e64;
+      --success-bg: rgba(47, 158, 100, 0.14);
+      --error: #d94f4f;
+      --error-bg: rgba(217, 79, 79, 0.12);
+      --info: #b5674a;
+      --info-bg: rgba(181, 103, 74, 0.12);
+
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 9px;
+    }
+    :root[data-theme="dark"] {
+      --bg-1: #1a1310;
+      --bg-2: #17131f;
+      --aurora-1: rgba(239, 127, 95, 0.22);
+      --aurora-2: rgba(245, 170, 120, 0.18);
+
+      --text: #f4ece7;
+      --text-muted: #b3a49b;
+      --border: rgba(255, 255, 255, 0.13);
+      --border-soft: rgba(255, 255, 255, 0.07);
+      --highlight: rgba(255, 255, 255, 0.12);
+      --shadow: rgba(0, 0, 0, 0.5);
+
+      --accent: #ff9576;
+      --accent-2: #ffb066;
+      --accent-hover: #ff8055;
+      --accent-soft: rgba(255, 149, 118, 0.18);
+      --on-accent: #241611;
+
+      --glass: rgba(255, 255, 255, 0.055);
+      --glass-strong: rgba(255, 255, 255, 0.09);
+      --field-bg: rgba(255, 255, 255, 0.06);
+
+      --success: #6fe0a0;
+      --success-bg: rgba(47, 158, 100, 0.22);
+      --error: #ff9d86;
+      --error-bg: rgba(217, 79, 79, 0.22);
+      --info: #ffc199;
+      --info-bg: rgba(181, 103, 74, 0.22);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg-1: #1a1310; --bg-2: #17131f;
+        --aurora-1: rgba(239, 127, 95, 0.22); --aurora-2: rgba(245, 170, 120, 0.18);
+        --text: #f4ece7; --text-muted: #b3a49b;
+        --border: rgba(255, 255, 255, 0.13); --border-soft: rgba(255, 255, 255, 0.07);
+        --highlight: rgba(255, 255, 255, 0.12); --shadow: rgba(0, 0, 0, 0.5);
+        --accent: #ff9576; --accent-2: #ffb066; --accent-hover: #ff8055;
+        --accent-soft: rgba(255, 149, 118, 0.18); --on-accent: #241611;
+        --glass: rgba(255, 255, 255, 0.055); --glass-strong: rgba(255, 255, 255, 0.09);
+        --field-bg: rgba(255, 255, 255, 0.06);
+        --success: #6fe0a0; --success-bg: rgba(47, 158, 100, 0.22);
+        --error: #ff9d86; --error-bg: rgba(217, 79, 79, 0.22);
+        --info: #ffc199; --info-bg: rgba(181, 103, 74, 0.22);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(80% 55% at 100% 0%, var(--aurora-1), transparent 55%),
+        radial-gradient(75% 55% at 0% 100%, var(--aurora-2), transparent 55%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      background-attachment: fixed;
+    }
+    .page-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
+    .page-head .titles { flex: 1; }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.3px;
+    }
+    .subtitle { color: var(--text-muted); font-size: 14px; margin: 0; }
+    .theme-btn {
+      flex: none; width: 38px; height: 38px; border-radius: 12px;
+      border: 1px solid var(--border-soft); cursor: pointer;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 16px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: inset 0 1px 0 var(--highlight);
+      transition: transform 0.1s, filter 0.15s;
+    }
+    .theme-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 14px 40px var(--shadow), inset 0 1px 0 var(--highlight);
+      padding: 20px 22px;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+      letter-spacing: 0.01em;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-family: inherit;
+      margin-bottom: 12px;
+      background: var(--field-bg);
+      color: var(--text);
+      box-shadow: inset 0 1px 0 var(--highlight);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input::placeholder { color: var(--text-muted); opacity: 0.7; }
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: inset 0 1px 0 var(--highlight), 0 0 0 3px var(--accent-soft);
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: -6px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--on-accent);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 11px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.3);
+      transition: filter 0.15s, transform 0.05s;
+    }
+    .btn-primary:hover { filter: brightness(1.05); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-secondary {
+      background: var(--field-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 var(--highlight);
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn-secondary:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .status {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border-soft);
+    }
+    .status.success { background: var(--success-bg); color: var(--success); }
+    .status.error { background: var(--error-bg); color: var(--error); }
+    .status.info { background: var(--info-bg); color: var(--info); }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .field-list { list-style: none; margin: 0; padding: 0; }
+    .field-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 13px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-md);
+      margin-bottom: 8px;
+      background: var(--field-bg);
+      box-shadow: inset 0 1px 0 var(--highlight);
+      cursor: grab;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+    .field-item:hover { transform: translateY(-1px); }
+    .field-item.dragging { opacity: 0.4; }
+    .field-item.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .field-item .handle {
+      color: var(--text-muted);
+      font-size: 16px;
+      user-select: none;
+    }
+    .field-item input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      flex: none;
+      accent-color: var(--accent);
+    }
+    .field-item .field-label {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .field-item.field-disabled .field-label {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .field-item .col-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--glass-strong);
+      border: 1px solid var(--border);
+      padding: 5px 2px;
+      border-radius: 999px;
+      width: 42px;
+      flex: none;
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 0;
+      box-shadow: none;
+      cursor: text;
+    }
+    .field-item .col-badge:focus {
+      color: var(--text);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .field-item .col-badge:disabled { opacity: 0.5; cursor: default; }
+    .field-item .col-badge.col-conflict {
+      border-color: var(--error);
+      color: var(--error);
+      background: var(--error-bg);
+    }
+    .column-warning {
+      font-size: 12px;
+      color: var(--error);
+      background: var(--error-bg);
+      border: 1px solid var(--border-soft);
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+    }
+    .field-item .order-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .field-item .order-buttons button {
+      background: var(--glass-strong);
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
+      width: 24px;
+      height: 17px;
+      font-size: 9px;
+      line-height: 1;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0;
+    }
+    .field-item .order-buttons button:hover:not(:disabled) {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .field-item .order-buttons button:disabled { opacity: 0.3; cursor: default; }
+    .label-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0;
+    }
+    .label-chip {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .label-chip:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--on-accent);
+    }
+    .label-chip:disabled {
+      background: var(--success-bg);
+      color: var(--success);
+      cursor: default;
+    }
+    .dict-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    /* Строка списка меток: ручка перетаскивания + поле имени + ▲▼ + удалить. */
+    .field-item .label-name {
+      flex: 1;
+      margin-bottom: 0;
+      font-size: 13px;
+    }
+    .field-item .label-remove {
+      flex: none;
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      width: 32px; height: 32px;
+      cursor: pointer; font-size: 13px;
+      transition: opacity 0.15s;
+    }
+    .field-item .label-remove:hover { opacity: 0.75; }
+    .field-item .label-color {
+      flex: none;
+      width: 32px; height: 32px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 0;
+      background: transparent;
+    }
+    .field-item .label-color::-webkit-color-swatch-wrapper { padding: 0; }
+    .field-item .label-color::-webkit-color-swatch {
+      border: none;
+      border-radius: calc(var(--radius-sm) - 2px);
+    }
+    .field-item .label-color::-moz-color-swatch {
+      border: none;
+      border-radius: calc(var(--radius-sm) - 2px);
+    }
+    /* Цвет текста плашки и её прозрачность — рядом с выбором цвета фона. */
+    /* Цвет текста — такой же квадратик выбора цвета, как и цвет фона плашки. */
+    .field-item .label-text-color {
+      flex: none;
+      width: 32px; height: 32px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 0;
+      background: transparent;
+    }
+    .field-item .label-text-color::-webkit-color-swatch-wrapper { padding: 0; }
+    .field-item .label-text-color::-webkit-color-swatch {
+      border: none;
+      border-radius: calc(var(--radius-sm) - 2px);
+    }
+    .field-item .label-text-color::-moz-color-swatch {
+      border: none;
+      border-radius: calc(var(--radius-sm) - 2px);
+    }
+    .field-item .label-opacity {
+      flex: none;
+      width: 58px; height: 32px;
+      margin-bottom: 0;
+      padding: 0 6px;
+      font-size: 12px;
+      text-align: right;
+    }
+    .dict-row input { margin-bottom: 0; }
+    .dict-row .dict-keyword { flex: 1; }
+    .dict-row .dict-warehouse { flex: 1; }
+    .dict-row .dict-remove {
+      flex: none;
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-sm);
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.15s;
+    }
+    .dict-row .dict-remove:hover { opacity: 0.75; }
+    .id-hint {
+      background: var(--field-bg);
+      border: 1px solid var(--border-soft);
+      box-shadow: inset 0 1px 0 var(--highlight);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .id-hint code {
+      background: var(--glass-strong);
+      border: 1px solid var(--border-soft);
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-head">
+    <div class="titles">
+      <h1>⚙️ Настройки расширения</h1>
+      <div class="subtitle">Одни настройки на обе функции: захват писем и панель проблемных писем</div>
+    </div>
+    <button class="theme-btn" id="themeToggle" title="Светлая/тёмная тема" type="button">🌙</button>
+  </div>
+
+  <div id="status" class="status info">Загрузка настроек...</div>
+
+  <div class="card">
+    <h3>📊 Подключение к таблице</h3>
+
+    <label for="spreadsheetId">ID таблицы</label>
+    <input type="text" id="spreadsheetId" placeholder="1ABC123_xyz...">
+    <div class="id-hint">
+      🔑 ID таблицы — это часть URL:<br>
+      <code>https://docs.google.com/spreadsheets/d/<strong>1ABC123_xyz...</strong>/edit</code>
+    </div>
+
+    <label for="sheetName">Название листа</label>
+    <input type="text" id="sheetName" placeholder="Контроль почты">
+    <div class="hint">Название вкладки внизу таблицы (по умолчанию: Контроль почты)</div>
+  </div>
+
+  <div class="card">
+    <h3>📝 Поля и колонки таблицы</h3>
+    <div class="hint">Впишите нужную букву колонки для каждого поля — эти же номера использует и форма «Взять на контроль», и панель проблемных писем. Можно оставлять пропуски (например, под свои формулы). Снимите галочку, чтобы поле не переносилось. Колонка <strong>«Выполнено (галочка)»</strong> — это столбец с чекбоксом, по которому панель прячет закрытые письма и ставит отметку кнопкой «Выполнено». Колонка <strong>«Метка»</strong> заполняется сама — в неё пишется метка плашки, на которую вы бросили письмо (или выбранная в форме): по ней счётчик и кнопка 🏷️ каждой плашки работают только со своими письмами.</div>
+
+    <div id="columnWarning" class="column-warning" style="display: none;"></div>
+    <ul class="field-list" id="fieldList"></ul>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Метки со страницы почты</h3>
+    <div class="hint">Откройте Яндекс Почту в отдельной вкладке, затем нажмите кнопку — найденные метки появятся ниже. Это просто подсказка, какие метки есть в почте: их названия сразу подставляются в подсказки полей «Метки на письме» и «Словарь складов». Клик по метке копирует её название в буфер. Сами метки никуда автоматически не добавляются — вписывайте их в нужное поле вручную.</div>
+    <button id="detectLabelsBtn" type="button" class="btn-secondary">🔍 Найти метки на странице почты</button>
+    <div id="detectedLabels" class="label-chips"></div>
+    <datalist id="allLabelOptions"></datalist>
+  </div>
+
+  <div class="card">
+    <h3>🏬 Словарь складов по меткам</h3>
+    <div class="hint">Если в метке письма встречается указанная часть названия (без учёта регистра), поле "Склад" в окне переноса заполнится автоматически — но его всегда можно поправить вручную.</div>
+
+    <div id="warehouseDictList"></div>
+    <button id="addWarehouseRow" type="button" class="btn-secondary">➕ Добавить строку</button>
+  </div>
+
+  <div class="card">
+    <h3>📦 Словарь видов писем по меткам</h3>
+    <div class="hint">Так же, как словарь складов, но для поля "Вид": если в метке письма встречается указанная часть названия, поле "Вид" заполнится автоматически.</div>
+
+    <div id="typeDictList"></div>
+    <button id="addTypeRow" type="button" class="btn-secondary">➕ Добавить строку</button>
+  </div>
+
+  <div class="card">
+    <h3>🏷️ Метки на письме</h3>
+    <div class="hint">Когда письмо добавляется в таблицу, расширение может само вешать метку на всю его ветку в Яндекс.Почте — чтобы было видно, что письмо уже взято на контроль. При нажатии «Выполнено» в панели метки снимаются. Метка ищется по имени, поэтому у сменщицы она проставится на её же метку с тем же названием.<br><br>
+    <strong>Эта же метка будет использоваться как «Вид» письма.</strong></div>
+
+    <label style="display:flex; align-items:center; gap:8px; margin-top:8px; cursor:pointer;">
+      <input type="checkbox" id="labelEnabled" style="width:auto;">
+      <span>Ставить метку при добавлении / снимать при «Выполнено»</span>
+    </label>
+
+    <label style="margin-top:10px;">Названия меток</label>
+    <ul class="field-list" id="labelList"></ul>
+    <button id="addLabelRow" type="button" class="btn-secondary">➕ Добавить метку</button>
+    <div class="hint">Впишите точные названия меток из почты или начните вводить для подсказок. Нажмите «🔍 Найти метки на странице почты» выше — названия подтянутся в подсказки.<br><br>
+    <strong>Каждая метка — своя плашка в почте.</strong> Плашка называется именем метки, порядок плашек сверху вниз — как в этом списке (перетаскивайте за «⠿» или двигайте кнопками ▲▼). Бросили письмо на плашку — оно уйдёт в таблицу с её меткой. Когда меток больше одной, кнопка «🏷️ проставить/снять метку» переезжает из окна панели прямо на плашки — справа от счётчика писем, по кнопке на метку.</div>
+  </div>
+
+  <div class="card">
+    <h3>✅ Кнопка «Выполнено»</h3>
+    <div class="hint">Плавающая кнопка на открытом письме — появляется, когда на письме висит одна из ваших меток. Её можно перетащить мышью в удобное место (двойной клик вернёт под плашки); место кнопки хранится только в вашем браузере. Здесь настраивается её вид.</div>
+    <div class="dict-row" style="margin-top:10px;">
+      <label style="flex:1; margin:0;">Цвет кнопки
+        <input type="color" id="quickDoneColor" class="label-color" style="width:100%; height:32px;">
+      </label>
+      <label style="flex:1; margin:0;">Цвет текста
+        <input type="color" id="quickDoneTextColor" class="label-color" style="width:100%; height:32px;">
+      </label>
+      <label style="flex:1; margin:0;">Непрозрачность, %
+        <input type="number" id="quickDoneOpacity" min="10" max="100" step="5" style="width:100%; height:32px; margin:0;">
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🏷️ Полоса «Обновить метки»</h3>
+    <div class="hint">Появляется над стопкой плашек, когда меток больше одной, и обновляет метки <strong>всех</strong> плашек разом. Краснеет сама, когда в таблице что-то менялось, — но нажать её можно в любой момент: метку могли снять вручную прямо в почте, а этого расширение из таблицы не видит. Здесь настраивается её обычный (некрасный) вид.</div>
+    <div class="dict-row" style="margin-top:10px;">
+      <label style="flex:1; margin:0;">Цвет полосы
+        <input type="color" id="syncAllColor" class="label-color" style="width:100%; height:32px;">
+      </label>
+      <label style="flex:1; margin:0;">Цвет текста
+        <input type="color" id="syncAllTextColor" class="label-color" style="width:100%; height:32px;">
+      </label>
+      <label style="flex:1; margin:0;">Непрозрачность, %
+        <input type="number" id="syncAllOpacity" min="10" max="100" step="5" style="width:100%; height:32px; margin:0;">
+      </label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="saveBtn" class="btn-primary">💾 Сохранить</button>
+    <button id="testBtn" class="btn-secondary">🧪 Проверить</button>
+    <button id="resetBtn" class="btn-secondary">↩️ Сбросить</button>
+  </div>
+
+  <div id="extVersion" style="text-align:center; opacity:0.5; font-size:12px; margin-top:16px;"></div>
+
+  <script src="defaults.js"></script>
+  <script src="theme.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

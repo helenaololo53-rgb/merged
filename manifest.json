@@ -1,0 +1,84 @@
+{
+  "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArcXaatvlxDKlPaHnIe9pcGNl+xKSdkIzVYqJW3KYmKUKB9WHA6YYFY7912Sv+pqrxJgs24uMTeZcjWpAyrgHG8scLeIrZ+tuJG86vLqvDh30/8RtWrSCs2u96xcmGQ4t1b85Z2ZRSrC36HITPt3onfOi8wrFsUfaxmuB52FEmsbO3mpJ2r0PzEcaTCnNERiJb8T4eI9V1QjSqxXPnkgNR2qMcMezpq4i2EcbW3PNfgaVyJMy7ZZaWB1Gr56Bjx7svGSnqBXh0EC/cRX29/V9NImvIx9cFxHdjygo6DFVNhJf+7zfAW5HfCquZ+59YkW4qOjs1xRtLA7+su6tEiQIGwIDAQAB",
+  "name": "Контроль почты — Проблемные письма",
+  "version": "2.92.6",
+  "description": "Захват писем в Google Таблицу и панель проблемных писем прямо в Яндекс Почте — единые настройки колонок",
+  "permissions": ["storage", "alarms", "identity", "activeTab"],
+  "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://sheets.googleapis.com/*",
+    "https://mail.yandex.ru/*",
+    "https://yandex.ru/mail/*",
+    "https://mail.yandex.by/*",
+    "https://yandex.by/mail/*",
+    "https://mail.yandex.com/*",
+    "https://yandex.com/mail/*",
+    "https://mail.yandex.kz/*",
+    "https://yandex.kz/mail/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.yandex.ru/*",
+        "https://yandex.ru/mail/*",
+        "https://mail.yandex.by/*",
+        "https://yandex.by/mail/*",
+        "https://mail.yandex.com/*",
+        "https://yandex.com/mail/*",
+        "https://mail.yandex.kz/*",
+        "https://yandex.kz/mail/*"
+      ],
+      "js": ["inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://mail.yandex.ru/*",
+        "https://yandex.ru/mail/*",
+        "https://mail.yandex.by/*",
+        "https://yandex.by/mail/*",
+        "https://mail.yandex.com/*",
+        "https://yandex.com/mail/*",
+        "https://mail.yandex.kz/*",
+        "https://yandex.kz/mail/*"
+      ],
+      "js": ["content-capture.js", "content-panel.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Контроль почты",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options.html",
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Y",
+        "mac": "Alt+Y"
+      },
+      "description": "Открыть окно контроля почты"
+    }
+  },
+  "oauth2": {
+    "client_id": "885756031276-1r4rb8cqtkgk3bmu90vgjvn231g43tqo.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/spreadsheets"]
+  }
+}
