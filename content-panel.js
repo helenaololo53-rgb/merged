@@ -286,10 +286,17 @@
         if (noteAuthResult(data)) {
             await refreshEnvelope();
             data = await apiRequestRaw(models, m, timeoutMs);
-            noteAuthResult(data);
+            // Почта по-прежнему отклоняет: это не «форма запроса не подошла», а
+            // мёртвая сессия (долгий простой, отпуск). Кидаем отдельную ошибку, чтобы
+            // вызывающий не считал её отказом механизма и не выключал механизм на весь
+            // сеанс — ровно так после возвращения из отпуска «всё переставало работать».
+            if (noteAuthResult(data)) throw new Error('auth-trouble');
         }
         return data;
     }
+    // Признак мёртвой сессии у ошибки. Помощник для всех выборок почты: протухший ключ
+    // не должен дискредитировать рабочие механизмы (MIDS/TID/метки/папки).
+    function isAuthTrouble(e) { return !!(e && e.message === 'auth-trouble'); }
 
     // Какими параметрами сама почта просит список писем. Когда открыт вид метки
     // (#/label/<lid>), это ровно тот запрос, который нам и нужен, — берём написание
@@ -360,7 +367,7 @@
         if (noteAuthResult(data)) {
             await refreshEnvelope();
             data = await apiSearchRaw(topic, folderId, timeoutMs, params);
-            noteAuthResult(data);
+            if (noteAuthResult(data)) throw new Error('auth-trouble');
         }
         return data;
     }
@@ -1359,6 +1366,7 @@
             }
         } catch (e) {
             dlog('Ошибка обычного поиска, пробуем по папкам:', e);
+            if (isAuthTrouble(e)) throw e;   // мёртвая сессия: обход папок не поможет
         }
 
         let folders;
@@ -1407,6 +1415,7 @@
                 }
             } catch (e) {
                 dlog('Ошибка поиска в папке:', folder.name, e);
+                if (isAuthTrouble(e)) throw e;
             }
         }
 
@@ -1427,6 +1436,7 @@
                 }
             } catch (e) {
                 dlog('Ошибка поиска в папке:', folder.name, e);
+                if (isAuthTrouble(e)) throw e;
             }
         }
 
@@ -1463,6 +1473,7 @@
             }
         } catch (e) {
             dlog('Ошибка глобального фолбэк-поиска:', e);
+            if (isAuthTrouble(e)) throw e;
         }
 
         // Если ничего не найдено, возвращаем пустой результат
@@ -1973,10 +1984,23 @@
             return { ok: ok, error: ok ? '' : (modelErrorText(m) || 'label-failed') };
         }
 
-        let res = await attempt();
+        let res;
+        try {
+            res = await attempt();
+        } catch (e) {
+            // Мёртвая сессия: повтор бесполезен — отдаём ошибку сразу, без лишних
+            // десятков секунд на пересъёмку конверта.
+            if (isAuthTrouble(e)) return { ok: false, error: 'auth-trouble' };
+            throw e;
+        }
         if (!res.ok) {
             await new Promise(function (r) { setTimeout(r, 500); });
-            res = await attempt();
+            try {
+                res = await attempt();
+            } catch (e) {
+                if (isAuthTrouble(e)) return { ok: false, error: 'auth-trouble' };
+                throw e;
+            }
         }
         return res;
     }
@@ -3085,7 +3109,9 @@
             if (!Array.isArray(list)) { LABEL_FILTER_WORKS = false; return false; }
             LABEL_FILTER_WORKS = list.length === 0;
         } catch (e) {
-            LABEL_FILTER_WORKS = false;
+            // Мёртвая сессия — не свидетельство о фильтре: не запоминаем ничего.
+            if (!isAuthTrouble(e)) LABEL_FILTER_WORKS = false;
+            return false;
         }
         return LABEL_FILTER_WORKS;
     }
@@ -3187,6 +3213,13 @@
             let data;
             try { data = await apiRequest([{ name: 'messages', params: params, meta: { requestAttempt: 1 } }], 'messages'); }
             catch (e) {
+                // Мёртвая сессия: возвращаем null, НЕ дискредитируя механизм — иначе
+                // первые же запросы после простоя выключали выборку «кто носит метку»
+                // на весь сеанс, и прогон разбирал всю таблицу минутами.
+                if (isAuthTrouble(e)) {
+                    attempts.push({ 'форма': si, 'итог': 'почта отклоняет запросы (сессия устарела)' });
+                    return null;
+                }
                 attempts.push({ 'форма': si, 'итог': 'запрос не прошёл', 'ошибка': (e && e.message) || String(e) });
                 continue;
             }
@@ -3363,7 +3396,7 @@
             const params = shapes[si];
             let data;
             try { data = await apiRequest([{ name: 'messages', params: params, meta: { requestAttempt: 1 } }], 'messages'); }
-            catch (e) { continue; }
+            catch (e) { if (isAuthTrouble(e)) return null; continue; }   // мёртвая сессия — не вина механизма
             const model = data && data.models && data.models[0];
             const msgs = (model && model.data && model.data.message) || [];
             if (!msgs.length) continue;
@@ -3435,7 +3468,7 @@
         for (const params of shapes) {
             let data;
             try { data = await apiRequest([{ name: 'messages', params: params, meta: { requestAttempt: 1 } }], 'messages'); }
-            catch (e) { continue; }
+            catch (e) { if (isAuthTrouble(e)) return null; continue; }   // мёртвая сессия — не вина механизма
             const model = data && data.models && data.models[0];
             const msgs = (model && model.data && model.data.message) || [];
             if (!msgs.length) continue;
@@ -5557,6 +5590,9 @@
         const raw = String((e && e.message) || e || '');
         if (/Extension context invalidated/i.test(raw)) {
             return 'расширение обновилось — обновите эту вкладку почты (F5) и повторите';
+        }
+        if (raw === 'auth-trouble' || raw === 'auth') {
+            return 'почта отклоняет запросы (ключ сессии устарел) — обновите страницу почты (F5)';
         }
         return raw;
     }
@@ -10150,11 +10186,15 @@
 
     function stripRowSubjectTail(text) {
         let out = stripReplyMarks(text);
+        // Служебные хвосты приходят из aria-label, где почта диктует их через запятую
+        // («, 10:41», «, 25 августа»). Требование запятой сохраняет легитимные концы
+        // тем: «заказ от 18.04», «встреча 25.08» — часть темы, а не служебный хвост.
+        // Старые строки вида «Дёке-Запад ООО, 10:41» по этому правилу чистятся.
         const tails = [
-            /[,\s]+\d{1,2}:\d{2}(:\d{2})?$/,                        // 10:41
-            /[,\s]+\d{1,2}\s+[а-яё]{3,}(\s+\d{4})?$/i,               // 25 августа 2026
-            /[,\s]+\d{1,2}\.\d{1,2}(\.\d{2,4})?$/,                   // 25.08.2026
-            /[,\s]+(вчера|сегодня|позавчера)$/i
+            /,\s*\d{1,2}:\d{2}(:\d{2})?$/,                          // , 10:41
+            /,\s*\d{1,2}\s+[а-яё]{3,}(\s+\d{4})?$/i,                // , 25 августа 2026
+            /,\s*\d{1,2}\.\d{1,2}(\.\d{2,4})?$/,                    // , 25.08.2026
+            /,\s*(вчера|сегодня|позавчера)$/i
         ];
         let changed = true;
         while (changed) {
@@ -10202,6 +10242,27 @@
                 .replace(/\s*,\s*,\s*/g, ', ')
                 .replace(/\s{2,}/g, ' ');
         }
+        // Метки в aria-label перечислены ДО темы, поэтому вырезаем ПЕРВОЕ вхождение и
+        // только целым куском (за ним разделитель). cutOut с lastIndexOf для меток
+        // опасен: бил ВНУТРЬ темы, когда имя метки было подстрокой слова темы —
+        // «Партизан» съедал начало «Партизанский», и в таблицу уезжало
+        // «ский перемещение : 0000-…».
+        function cutLabel(text, piece) {
+            const val = String(piece || '').trim();
+            if (!val) return text;
+            let from = 0;
+            for (;;) {
+                const i = text.indexOf(val, from);
+                if (i === -1) return text;
+                const next = text.charAt(i + val.length);
+                if (next === '' || next === ',' || next === ' ' || next === '\u00a0') {
+                    return (text.slice(0, i) + ' ' + text.slice(i + val.length))
+                        .replace(/\s*,\s*,\s*/g, ', ')
+                        .replace(/\s{2,}/g, ' ');
+                }
+                from = i + val.length;
+            }
+        }
         rest = cutOut(rest, textOf('[data-testid="messages-list_message-date"]'));
         rest = cutOut(rest, textOf('[data-testid="message-common_folder-name"]'));
         // Начало текста письма почта диктует сразу ЗА темой, через запятую. Если его
@@ -10222,7 +10283,7 @@
         // Метки письма («Архив», «Партизан») в aria-label тоже перечислены до темы —
         // вырезаем их, иначе они уезжают в тему вместе с ней.
         try {
-            collectRowLabelTexts(row, '').forEach(function (t) { rest = cutOut(rest, t); });
+            collectRowLabelTexts(row, '').forEach(function (t) { rest = cutLabel(rest, t); });
         } catch (e) { /* меток нет — не страшно */ }
         rest = rest.replace(/^[,\s]+/, '');
         // …и на всякий случай убираем оставшийся хвост со временем/датой.
@@ -10268,7 +10329,10 @@
                 if (t) parts.push(t);
             });
             const s = parts.join(' ').replace(/\s+/g, ' ').trim();
-            if (s) return stripRowSubjectTail(s).slice(0, 200);
+            // Хвосты не трогаем: в узле темы ровно тема, служебных приписок там нет.
+            // Регекспы хвостов предназначались aria-label, а здесь съедали легитимные
+            // куски темы вида «заказ от 18.04» — так в таблице появлялись обрезки.
+            if (s) return stripReplyMarks(s).slice(0, 200);
         }
         return '';
     }
